@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>نظام الفواتير</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #f5f5f5;
+            margin: 0;
+            padding: 20px;
+            text-align: center;
+        }
+        .container {
+            max-width: 400px;
+            margin: 50px auto;
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h2 {
+            color: #333;
+            margin-bottom: 20px;
+        }
+        input {
+            width: 100%;
+            padding: 12px;
+            margin: 10px 0;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            box-sizing: border-box;
+            font-size: 16px;
+        }
+        .btn {
+            background: #4CAF50;
+            color: white;
+            padding: 12px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            width: 100%;
+            margin: 5px 0;
+        }
+        .btn:hover {
+            background: #45a049;
+        }
+        .invoice-list {
+            margin-top: 20px;
+        }
+        #loginSection, #invoicesSection, #detailsSection {
+            display: block;
+        }
+        .hidden {
+            display: none;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: right;
+        }
+        th {
+            background-color: #f2f2f2;
+        }
+        .error {
+            color: red;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- صفحة تسجيل الدخول -->
+        <div id="loginSection">
+            <h2>تسجيل الدخول</h2>
+            <input type="text" id="mobile" placeholder="رقم الموبايل">
+            <input type="password" id="password" placeholder="كلمة المرور">
+            <button class="btn" onclick="login()">دخول</button>
+            <p id="errorMsg" class="error"></p>
+        </div>
+        
+        <!-- صفحة الأزرار -->
+        <div id="invoicesSection" class="hidden">
+            <h2>فواتير <span id="customerName"></span></h2>
+            <div id="invoiceButtons" class="invoice-list"></div>
+            <button class="btn" style="background: #f44336;" onclick="logout()">تسجيل خروج</button>
+        </div>
+        
+        <!-- صفحة التفاصيل -->
+        <div id="detailsSection" class="hidden">
+            <h2>تفاصيل الفاتورة <span id="invoiceCode"></span></h2>
+            <p>التاريخ: <span id="invoiceDate"></span></p>
+            <table>
+                <thead>
+                    <tr>
+                        <th>رقم البند</th>
+                        <th>الصنف</th>
+                        <th>الكمية</th>
+                        <th>سعر الوحدة</th>
+                        <th>الإجمالي</th>
+                    </tr>
+                </thead>
+                <tbody id="detailsTable"></tbody>
+            </table>
+            <p>الإجمالي: <strong id="totalAmount"></strong></p>
+            <button class="btn" onclick="backToInvoices()">رجوع للفواتير</button>
+        </div>
+    </div>
+
+    <script>
+        const SCRIPT_URL = 'https://script.google.com/macros/s/https://script.google.com/macros/s/AKfycbwuO4NPl0_rAoWvUgruJB81b4QjBAYEJNa4sk2nnGG7pPRmJdO7I_bRKvZzLICdgdDY/exec/exec';
+        let currentCustomerId = null;
+        let currentInvoices = [];
+
+        function login() {
+            const mobile = document.getElementById('mobile').value;
+            const password = document.getElementById('password').value;
+            
+            fetch(SCRIPT_URL, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                body: `action=login&mobile=${encodeURIComponent(mobile)}&password=${encodeURIComponent(password)}`
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    currentCustomerId = data.customerId;
+                    document.getElementById('customerName').textContent = data.customerName;
+                    document.getElementById('loginSection').classList.add('hidden');
+                    document.getElementById('invoicesSection').classList.remove('hidden');
+                    
+                    const buttonsDiv = document.getElementById('invoiceButtons');
+                    buttonsDiv.innerHTML = '';
+                    currentInvoices = data.invoices;
+                    
+                    data.invoices.forEach(invoice => {
+                        const btn = document.createElement('button');
+                        btn.className = 'btn';
+                        btn.textContent = `${invoice.code} - ${invoice.date}`;
+                        btn.onclick = () => showInvoiceDetails(invoice.invoiceId, invoice.code, invoice.date, invoice.total);
+                        buttonsDiv.appendChild(btn);
+                    });
+                    
+                    if (data.invoices.length === 0) {
+                        buttonsDiv.innerHTML = '<p>لا توجد فواتير بعد</p>';
+                    }
+                } else {
+                    document.getElementById('errorMsg').textContent = data.message;
+                }
+            });
+        }
+
+        function showInvoiceDetails(invoiceId, code, date, total) {
+            fetch(SCRIPT_URL, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                body: `action=getInvoice&invoiceId=${invoiceId}`
+            })
+            .then(response => response.json())
+            .then(details => {
+                document.getElementById('invoiceCode').textContent = code;
+                document.getElementById('invoiceDate').textContent = date;
+                document.getElementById('totalAmount').textContent = total;
+                
+                const tableBody = document.getElementById('detailsTable');
+                tableBody.innerHTML = '';
+                
+                details.forEach(item => {
+                    const row = `<tr>
+                        <td>${item.itemNumber}</td>
+                        <td>${item.product}</td>
+                        <td>${item.quantity}</td>
+                        <td>${item.unitPrice}</td>
+                        <td>${item.total}</td>
+                    </tr>`;
+                    tableBody.innerHTML += row;
+                });
+                
+                document.getElementById('invoicesSection').classList.add('hidden');
+                document.getElementById('detailsSection').classList.remove('hidden');
+            });
+        }
+
+        function backToInvoices() {
+            document.getElementById('detailsSection').classList.add('hidden');
+            document.getElementById('invoicesSection').classList.remove('hidden');
+        }
+
+        function logout() {
+            document.getElementById('invoicesSection').classList.add('hidden');
+            document.getElementById('loginSection').classList.remove('hidden');
+            document.getElementById('mobile').value = '';
+            document.getElementById('password').value = '';
+            document.getElementById('errorMsg').textContent = '';
+            currentCustomerId = null;
+            currentInvoices = [];
+        }
+    </script>
+</body>
+</html>
