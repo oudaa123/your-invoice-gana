@@ -3,205 +3,853 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>نظام الفواتير</title>
+    <title>نظام الفواتير المتكامل</title>
     <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: #f5f5f5;
-            margin: 0;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
             padding: 20px;
-            text-align: center;
         }
+        
         .container {
-            max-width: 400px;
-            margin: 50px auto;
+            max-width: 600px;
+            margin: 0 auto;
             background: white;
-            padding: 30px;
-            border-radius: 10px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            border-radius: 15px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+            overflow: hidden;
         }
-        h2 {
-            color: #333;
-            margin-bottom: 20px;
+        
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 15px;
+            text-align: center;
+            font-size: 18px;
+            font-weight: bold;
         }
-        input {
+        
+        .content { padding: 20px; }
+        
+        h2 { color: #333; margin-bottom: 15px; text-align: center; font-size: 20px; }
+        h3 { color: #667eea; margin: 15px 0 10px 0; font-size: 16px; }
+        
+        input, textarea, select {
+            width: 100%;
+            padding: 10px 12px;
+            margin: 6px 0;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 15px;
+            transition: border 0.3s;
+            font-family: inherit;
+        }
+        
+        input:focus, textarea:focus, select:focus {
+            border-color: #667eea;
+            outline: none;
+        }
+        
+        .btn {
             width: 100%;
             padding: 12px;
-            margin: 10px 0;
-            border: 1px solid #ddd;
-            border-radius: 5px;
-            box-sizing: border-box;
-            font-size: 16px;
-        }
-        .btn {
-            background: #4CAF50;
-            color: white;
-            padding: 12px 20px;
             border: none;
-            border-radius: 5px;
+            border-radius: 8px;
+            font-size: 15px;
+            font-weight: bold;
             cursor: pointer;
-            font-size: 16px;
-            width: 100%;
-            margin: 5px 0;
+            margin: 6px 0;
+            transition: transform 0.2s;
         }
-        .btn:hover {
-            background: #45a049;
-        }
-        .invoice-list {
-            margin-top: 20px;
-        }
-        #loginSection, #invoicesSection, #detailsSection {
-            display: block;
-        }
-        .hidden {
-            display: none;
-        }
+        
+        .btn:active { transform: scale(0.98); }
+        .btn-primary { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; }
+        .btn-success { background: #4CAF50; color: white; }
+        .btn-info { background: #2196F3; color: white; }
+        .btn-danger { background: #f44336; color: white; }
+        .btn-warning { background: #FF9800; color: white; }
+        .btn-small { width: auto; padding: 8px 15px; font-size: 13px; margin: 3px; }
+        
+        .error { color: #f44336; margin-top: 8px; text-align: center; font-size: 14px; }
+        .success { color: #4CAF50; margin-top: 8px; text-align: center; font-size: 14px; }
+        .loading { color: #2196F3; margin-top: 8px; text-align: center; font-size: 14px; }
+        
+        .hidden { display: none; }
+        
         table {
             width: 100%;
             border-collapse: collapse;
-            margin: 20px 0;
+            margin: 10px 0;
+            font-size: 13px;
         }
-        th, td {
-            border: 1px solid #ddd;
-            padding: 8px;
-            text-align: right;
-        }
+        
         th {
-            background-color: #f2f2f2;
+            background: #667eea;
+            color: white;
+            padding: 8px;
+            text-align: center;
+            font-size: 13px;
         }
-        .error {
-            color: red;
-            margin-top: 10px;
+        
+        td {
+            padding: 8px;
+            text-align: center;
+            border-bottom: 1px solid #e0e0e0;
+            font-size: 13px;
+        }
+        
+        tr:hover td { background: #f5f5f5; }
+        
+        .invoice-btn {
+            width: 100%;
+            padding: 12px;
+            margin: 5px 0;
+            background: white;
+            border: 2px solid #667eea;
+            border-radius: 8px;
+            color: #667eea;
+            font-size: 14px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .invoice-btn:hover { background: #667eea; color: white; }
+        
+        .total-section {
+            background: #f0f0f0;
+            padding: 12px;
+            border-radius: 8px;
+            margin: 15px 0;
+            text-align: center;
+            font-size: 16px;
+            font-weight: bold;
+        }
+        
+        .customer-welcome {
+            background: #e8f5e9;
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            text-align: center;
+            font-size: 16px;
+            color: #2e7d32;
+        }
+        
+        .item-row {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+            margin: 8px 0;
+            flex-wrap: wrap;
+        }
+        
+        .item-row input {
+            margin: 0;
+            flex: 1;
+            min-width: 70px;
+        }
+        
+        .remove-btn {
+            background: #f44336;
+            color: white;
+            border: none;
+            padding: 8px 12px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.5);
+            overflow-y: auto;
+        }
+        
+        .modal-content {
+            background-color: white;
+            margin: 10% auto;
+            padding: 20px;
+            border-radius: 15px;
+            width: 90%;
+            max-width: 500px;
+        }
+        
+        .button-group {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+        
+        .button-group .btn {
+            flex: 1;
+        }
+        
+        .transaction-item {
+            background: white;
+            border: 1px solid #e0e0e0;
+            padding: 10px;
+            margin: 8px 0;
+            border-radius: 8px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .debit { color: #f44336; }
+        .credit { color: #4CAF50; }
+        
+        .invoice-actions {
+            display: flex;
+            gap: 5px;
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <!-- صفحة تسجيل الدخول -->
-        <div id="loginSection">
-            <h2>تسجيل الدخول</h2>
-            <input type="text" id="mobile" placeholder="رقم الموبايل">
-            <input type="password" id="password" placeholder="كلمة المرور">
-            <button class="btn" onclick="login()">دخول</button>
-            <p id="errorMsg" class="error"></p>
+        <div class="header">📋 نظام الفواتير المتكامل</div>
+        <div class="content">
+            <!-- 🔐 Login -->
+            <div id="loginSection">
+                <h2>🔐 تسجيل الدخول</h2>
+                <input type="text" id="mobile" placeholder="📱 أدخل رقم الموبايل">
+                <input type="password" id="password" placeholder="🔒 أدخل كلمة المرور">
+                <button class="btn btn-primary" onclick="login()">🚪 دخول</button>
+                <p id="errorMsg" class="error"></p>
+                <p id="loadingMsg" class="loading"></p>
+            </div>
+            
+            <!-- 📋 Invoices List -->
+            <div id="invoicesSection" class="hidden">
+                <div class="customer-welcome">👋 مرحباً <span id="customerName"></span></div>
+                <div class="button-group">
+                    <button class="btn btn-success" onclick="showAddInvoicePasswordModal()">➕ فاتورة</button>
+                    <button class="btn btn-info" onclick="showAddTransactionModal('تحصيل')">💵 تحصيل</button>
+                    <button class="btn btn-warning" onclick="showAddTransactionModal('رصيد_افتتاحي')">📊 رصيد أول</button>
+                    <button class="btn btn-primary" onclick="showBalance()">💰 أرصدة</button>
+                </div>
+                <h3>📋 الفواتير</h3>
+                <div id="invoiceButtons"></div>
+                <button class="btn btn-danger" onclick="logout()">🚪 تسجيل خروج</button>
+                <p id="invoiceMsg" class="success"></p>
+            </div>
+            
+            <!-- ➕ Add Invoice -->
+            <div id="addInvoiceSection" class="hidden">
+                <h2>➕ فاتورة جديدة</h2>
+                <input type="date" id="invoiceDate">
+                <div style="background: #f0f0f0; padding: 8px; border-radius: 8px; margin: 8px 0; text-align: center;">
+                    📋 الكود: <strong><span id="autoCodeDisplay">تلقائي</span></strong>
+                </div>
+                <h3>📦 البنود</h3>
+                <div id="itemsContainer">
+                    <div class="item-row" id="itemRow1">
+                        <input type="text" class="item-product" id="product1" placeholder="📝 اسم الصنف" onkeydown="handleItemKeyDown(event, 1)">
+                        <input type="number" class="item-quantity" id="quantity1" placeholder="🔢 الكمية" value="1" min="1" onkeydown="handleItemKeyDown(event, 1)">
+                        <input type="number" class="item-price" id="price1" placeholder="💵 السعر" value="0" min="0" step="0.01" onkeydown="handleItemKeyDown(event, 1)">
+                        <button class="remove-btn" onclick="removeItem(this)">✕</button>
+                    </div>
+                </div>
+                <div class="total-section" id="liveTotal">
+                    💰 الإجمالي: <strong><span id="liveTotalAmount">0.00</span></strong> ج.م
+                </div>
+                <button class="btn btn-success" onclick="saveInvoice()">💾 حفظ</button>
+                <button class="btn btn-warning" onclick="backToInvoices()">⬅ رجوع</button>
+                <p id="addInvoiceMsg" class="loading"></p>
+            </div>
+            
+            <!-- ✏️ Edit Invoice -->
+            <div id="editInvoiceSection" class="hidden">
+                <h2>✏️ تعديل فاتورة</h2>
+                <input type="date" id="editInvoiceDate">
+                <div style="background: #f0f0f0; padding: 8px; border-radius: 8px; margin: 8px 0; text-align: center;">
+                    📋 الكود: <strong><span id="editCodeDisplay"></span></strong>
+                </div>
+                <h3>📦 البنود</h3>
+                <div id="editItemsContainer"></div>
+                <button class="btn btn-info" onclick="addEditItemRow()">➕ إضافة بند</button>
+                <div class="total-section">
+                    💰 الإجمالي: <strong><span id="editTotalAmount">0.00</span></strong> ج.م
+                </div>
+                <button class="btn btn-success" onclick="updateInvoice()">💾 تحديث</button>
+                <button class="btn btn-warning" onclick="backToInvoices()">⬅ رجوع</button>
+                <p id="editInvoiceMsg" class="loading"></p>
+            </div>
+            
+            <!-- 📄 Invoice Details -->
+            <div id="detailsSection" class="hidden">
+                <h2>📄 فاتورة <span id="invoiceCodeDisplay"></span></h2>
+                <p style="text-align: center; color: #666;">📅 <span id="invoiceDateDisplay"></span></p>
+                <table>
+                    <thead><tr><th>#</th><th>الصنف</th><th>الكمية</th><th>السعر</th><th>الإجمالي</th></tr></thead>
+                    <tbody id="detailsTable"></tbody>
+                </table>
+                <div class="total-section">💰 الإجمالي: <strong><span id="totalAmount"></span></strong> ج.م</div>
+                <button class="btn btn-primary" onclick="backToInvoicesFromDetails()">⬅ رجوع</button>
+            </div>
+            
+            <!-- 💰 Balance -->
+            <div id="balanceSection" class="hidden">
+                <h2>💰 كشف حساب</h2>
+                <div class="total-section">
+                    💰 الرصيد الحالي: <strong><span id="currentBalance"></span></strong> ج.م
+                </div>
+                <div id="transactionsList"></div>
+                <button class="btn btn-warning" onclick="backToInvoicesFromBalance()">⬅ رجوع للفواتير</button>
+            </div>
         </div>
-        
-        <!-- صفحة الأزرار -->
-        <div id="invoicesSection" class="hidden">
-            <h2>فواتير <span id="customerName"></span></h2>
-            <div id="invoiceButtons" class="invoice-list"></div>
-            <button class="btn" style="background: #f44336;" onclick="logout()">تسجيل خروج</button>
+    </div>
+
+    <!-- 🔐 Password Modal -->
+    <div id="passwordModal" class="modal">
+        <div class="modal-content">
+            <h3>🔐 تأكيد الصلاحية</h3>
+            <p style="text-align: center; color: #666;">أدخل كلمة السر للمتابعة</p>
+            <input type="password" id="modalPassword" placeholder="🔒 كلمة السر">
+            <button class="btn btn-success" id="modalConfirmBtn">✅ تأكيد</button>
+            <button class="btn btn-danger" onclick="closePasswordModal()">❌ إلغاء</button>
+            <p id="modalError" class="error"></p>
         </div>
-        
-        <!-- صفحة التفاصيل -->
-        <div id="detailsSection" class="hidden">
-            <h2>تفاصيل الفاتورة <span id="invoiceCode"></span></h2>
-            <p>التاريخ: <span id="invoiceDate"></span></p>
-            <table>
-                <thead>
-                    <tr>
-                        <th>رقم البند</th>
-                        <th>الصنف</th>
-                        <th>الكمية</th>
-                        <th>سعر الوحدة</th>
-                        <th>الإجمالي</th>
-                    </tr>
-                </thead>
-                <tbody id="detailsTable"></tbody>
-            </table>
-            <p>الإجمالي: <strong id="totalAmount"></strong></p>
-            <button class="btn" onclick="backToInvoices()">رجوع للفواتير</button>
+    </div>
+    
+    <!-- 💵 Transaction Modal -->
+    <div id="transactionModal" class="modal">
+        <div class="modal-content">
+            <h3 id="transactionModalTitle">💵 إضافة معاملة</h3>
+            <input type="date" id="transactionDate">
+            <input type="number" id="transactionAmount" placeholder="💰 المبلغ" min="0" step="0.01">
+            <input type="text" id="transactionDescription" placeholder="📝 البيان">
+            <button class="btn btn-success" id="saveTransactionBtn">💾 حفظ</button>
+            <button class="btn btn-danger" onclick="closeTransactionModal()">❌ إلغاء</button>
+            <p id="transactionMsg" class="loading"></p>
         </div>
     </div>
 
     <script>
-        const SCRIPT_URL = 'https://script.google.com/macros/s/https://script.google.com/macros/s/AKfycbwuO4NPl0_rAoWvUgruJB81b4QjBAYEJNa4sk2nnGG7pPRmJdO7I_bRKvZzLICdgdDY/exec/exec';
+        const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyENB9AKWV3vjlZEC0afINMUh63lGJq7ybfO2Jl0pmnzbxAWEgkqDm0Whthdate2OZw/exec';
+        const ADMIN_PASSWORD = '010065';
         let currentCustomerId = null;
         let currentInvoices = [];
+        let currentTransactionType = '';
+        let currentEditInvoiceId = null;
+        let itemCounter = 1;
+        let editItemCounter = 0;
+        let pendingModalAction = null;
 
+        // ==================== NAVIGATION ====================
+        function showSection(sectionId) {
+            const sections = ['loginSection', 'invoicesSection', 'addInvoiceSection', 'editInvoiceSection', 'detailsSection', 'balanceSection'];
+            sections.forEach(id => document.getElementById(id).classList.add('hidden'));
+            if (sectionId) document.getElementById(sectionId).classList.remove('hidden');
+        }
+
+        // ==================== LOGIN ====================
         function login() {
-            const mobile = document.getElementById('mobile').value;
-            const password = document.getElementById('password').value;
+            const mobile = document.getElementById('mobile').value.trim();
+            const password = document.getElementById('password').value.trim();
+            
+            if (!mobile || !password) {
+                document.getElementById('errorMsg').textContent = '❌ يرجى إدخال رقم الموبايل وكلمة المرور';
+                return;
+            }
+            
+            document.getElementById('loadingMsg').textContent = '⏳ جاري تسجيل الدخول...';
             
             fetch(SCRIPT_URL, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
                 body: `action=login&mobile=${encodeURIComponent(mobile)}&password=${encodeURIComponent(password)}`
             })
-            .then(response => response.json())
+            .then(r => r.json())
             .then(data => {
+                document.getElementById('loadingMsg').textContent = '';
                 if (data.success) {
                     currentCustomerId = data.customerId;
                     document.getElementById('customerName').textContent = data.customerName;
-                    document.getElementById('loginSection').classList.add('hidden');
-                    document.getElementById('invoicesSection').classList.remove('hidden');
-                    
-                    const buttonsDiv = document.getElementById('invoiceButtons');
-                    buttonsDiv.innerHTML = '';
-                    currentInvoices = data.invoices;
-                    
-                    data.invoices.forEach(invoice => {
-                        const btn = document.createElement('button');
-                        btn.className = 'btn';
-                        btn.textContent = `${invoice.code} - ${invoice.date}`;
-                        btn.onclick = () => showInvoiceDetails(invoice.invoiceId, invoice.code, invoice.date, invoice.total);
-                        buttonsDiv.appendChild(btn);
-                    });
-                    
-                    if (data.invoices.length === 0) {
-                        buttonsDiv.innerHTML = '<p>لا توجد فواتير بعد</p>';
-                    }
+                    showInvoicesList(data.invoices);
                 } else {
-                    document.getElementById('errorMsg').textContent = data.message;
+                    document.getElementById('errorMsg').textContent = data.message || '❌ فشل تسجيل الدخول';
+                }
+            })
+            .catch(e => {
+                document.getElementById('loadingMsg').textContent = '';
+                document.getElementById('errorMsg').textContent = '❌ خطأ في الاتصال';
+            });
+        }
+
+        function showInvoicesList(invoices) {
+            currentInvoices = invoices;
+            showSection('invoicesSection');
+            
+            const div = document.getElementById('invoiceButtons');
+            div.innerHTML = '';
+            
+            if (invoices && invoices.length > 0) {
+                invoices.forEach(inv => {
+                    const btn = document.createElement('div');
+                    btn.className = 'invoice-btn';
+                    btn.innerHTML = `
+                        <span>📄 ${inv.code} - ${inv.date}</span>
+                        <span>💰 ${inv.total} ج.م</span>
+                        <div class="invoice-actions">
+                            <button class="btn btn-small btn-info" onclick="event.stopPropagation(); showEditInvoice('${inv.invoiceId}')">✏️</button>
+                            <button class="btn btn-small btn-danger" onclick="event.stopPropagation(); deleteInvoicePrompt('${inv.invoiceId}')">🗑️</button>
+                        </div>
+                    `;
+                    btn.onclick = () => showInvoiceDetails(inv.invoiceId, inv.code, inv.date, inv.total);
+                    div.appendChild(btn);
+                });
+            } else {
+                div.innerHTML = '<p style="text-align: center; color: #999;">📭 لا توجد فواتير</p>';
+            }
+        }
+
+        // ==================== DELETE INVOICE ====================
+        function deleteInvoicePrompt(invoiceId) {
+            showPasswordModal('delete', () => {
+                if (confirm('⚠️ هل أنت متأكد من حذف هذه الفاتورة؟')) {
+                    fetch(SCRIPT_URL, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                        body: `action=deleteInvoice&invoiceId=${encodeURIComponent(invoiceId)}&password=${ADMIN_PASSWORD}`
+                    })
+                    .then(r => r.json())
+                    .then(data => {
+                        alert(data.message || 'تم الحذف');
+                        refreshInvoices();
+                    });
                 }
             });
         }
 
+        // ==================== SHOW INVOICE DETAILS ====================
         function showInvoiceDetails(invoiceId, code, date, total) {
             fetch(SCRIPT_URL, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-                body: `action=getInvoice&invoiceId=${invoiceId}`
+                body: `action=getInvoice&invoiceId=${encodeURIComponent(invoiceId)}`
             })
-            .then(response => response.json())
+            .then(r => r.json())
             .then(details => {
-                document.getElementById('invoiceCode').textContent = code;
-                document.getElementById('invoiceDate').textContent = date;
+                document.getElementById('invoiceCodeDisplay').textContent = code;
+                document.getElementById('invoiceDateDisplay').textContent = date;
                 document.getElementById('totalAmount').textContent = total;
                 
-                const tableBody = document.getElementById('detailsTable');
-                tableBody.innerHTML = '';
-                
-                details.forEach(item => {
-                    const row = `<tr>
+                const tbody = document.getElementById('detailsTable');
+                tbody.innerHTML = details.map(item => `
+                    <tr>
                         <td>${item.itemNumber}</td>
                         <td>${item.product}</td>
                         <td>${item.quantity}</td>
                         <td>${item.unitPrice}</td>
                         <td>${item.total}</td>
-                    </tr>`;
-                    tableBody.innerHTML += row;
-                });
+                    </tr>
+                `).join('');
                 
-                document.getElementById('invoicesSection').classList.add('hidden');
-                document.getElementById('detailsSection').classList.remove('hidden');
+                showSection('detailsSection');
             });
         }
 
-        function backToInvoices() {
-            document.getElementById('detailsSection').classList.add('hidden');
-            document.getElementById('invoicesSection').classList.remove('hidden');
+        // ==================== ADD INVOICE ====================
+        function showAddInvoicePasswordModal() {
+            showPasswordModal('add-invoice', () => {
+                document.getElementById('invoiceDate').value = new Date().toISOString().split('T')[0];
+                document.getElementById('autoCodeDisplay').textContent = 'F' + Date.now().toString().slice(-6);
+                document.getElementById('itemsContainer').innerHTML = `
+                    <div class="item-row" id="itemRow1">
+                        <input type="text" class="item-product" id="product1" placeholder="📝 اسم الصنف" onkeydown="handleItemKeyDown(event, 1)">
+                        <input type="number" class="item-quantity" id="quantity1" placeholder="🔢 الكمية" value="1" min="1" onkeydown="handleItemKeyDown(event, 1)">
+                        <input type="number" class="item-price" id="price1" placeholder="💵 السعر" value="0" min="0" step="0.01" onkeydown="handleItemKeyDown(event, 1)">
+                        <button class="remove-btn" onclick="removeItem(this)">✕</button>
+                    </div>
+                `;
+                itemCounter = 1;
+                document.getElementById('liveTotal').style.display = 'block';
+                updateLiveTotal();
+                showSection('addInvoiceSection');
+                setTimeout(() => document.getElementById('product1')?.focus(), 300);
+            });
         }
 
+        function handleItemKeyDown(event, rowNum) {
+            if (event.key === 'Enter') {
+                event.preventDefault();
+                const currentInput = event.target;
+                const row = document.getElementById('itemRow' + rowNum);
+                
+                if (currentInput.classList.contains('item-product')) {
+                    // Move to quantity
+                    const qtyInput = row.querySelector('.item-quantity');
+                    if (qtyInput) qtyInput.focus();
+                } else if (currentInput.classList.contains('item-quantity')) {
+                    // Move to price
+                    const priceInput = row.querySelector('.item-price');
+                    if (priceInput) priceInput.focus();
+                } else if (currentInput.classList.contains('item-price')) {
+                    // Check if all fields are filled
+                    const product = row.querySelector('.item-product').value.trim();
+                    const quantity = row.querySelector('.item-quantity').value;
+                    const price = row.querySelector('.item-price').value;
+                    
+                    if (product && quantity && price) {
+                        // Save and add new row
+                        updateLiveTotal();
+                        const totalRows = document.querySelectorAll('.item-row').length;
+                        if (rowNum === totalRows) {
+                            // Add new row
+                            addItemRow();
+                            // Focus on new row's product
+                            setTimeout(() => {
+                                const newProductInput = document.getElementById('product' + (totalRows + 1));
+                                if (newProductInput) newProductInput.focus();
+                            }, 100);
+                        }
+                    }
+                }
+            }
+        }
+
+        function addItemRow() {
+            itemCounter++;
+            const container = document.getElementById('itemsContainer');
+            const row = document.createElement('div');
+            row.className = 'item-row';
+            row.id = 'itemRow' + itemCounter;
+            row.innerHTML = `
+                <input type="text" class="item-product" id="product${itemCounter}" placeholder="📝 اسم الصنف" onkeydown="handleItemKeyDown(event, ${itemCounter})">
+                <input type="number" class="item-quantity" id="quantity${itemCounter}" placeholder="🔢 الكمية" value="1" min="1" onkeydown="handleItemKeyDown(event, ${itemCounter})">
+                <input type="number" class="item-price" id="price${itemCounter}" placeholder="💵 السعر" value="0" min="0" step="0.01" onkeydown="handleItemKeyDown(event, ${itemCounter})">
+                <button class="remove-btn" onclick="removeItem(this)">✕</button>
+            `;
+            container.appendChild(row);
+        }
+
+        function removeItem(btn) {
+            const rows = document.querySelectorAll('.item-row');
+            if (rows.length > 1) {
+                btn.parentElement.remove();
+                updateLiveTotal();
+            }
+        }
+
+        function updateLiveTotal() {
+            const products = document.querySelectorAll('.item-product');
+            const quantities = document.querySelectorAll('.item-quantity');
+            const prices = document.querySelectorAll('.item-price');
+            let total = 0;
+            
+            for (let i = 0; i < products.length; i++) {
+                const qty = parseFloat(quantities[i].value) || 0;
+                const price = parseFloat(prices[i].value) || 0;
+                total += qty * price;
+            }
+            
+            document.getElementById('liveTotalAmount').textContent = total.toFixed(2);
+        }
+
+        function saveInvoice() {
+            const date = document.getElementById('invoiceDate').value;
+            const code = document.getElementById('autoCodeDisplay').textContent;
+            
+            const products = document.querySelectorAll('.item-product');
+            const quantities = document.querySelectorAll('.item-quantity');
+            const prices = document.querySelectorAll('.item-price');
+            const items = [];
+            
+            for (let i = 0; i < products.length; i++) {
+                const product = products[i].value.trim();
+                const quantity = parseInt(quantities[i].value);
+                const unitPrice = parseFloat(prices[i].value);
+                
+                if (product && quantity > 0 && unitPrice >= 0) {
+                    items.push({ product, quantity, unitPrice });
+                }
+            }
+            
+            if (items.length === 0) {
+                document.getElementById('addInvoiceMsg').textContent = '❌ يجب إضافة بند واحد على الأقل';
+                return;
+            }
+            
+            document.getElementById('addInvoiceMsg').textContent = '⏳ جاري الحفظ...';
+            
+            fetch(SCRIPT_URL, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                body: `action=addInvoice&customerId=${encodeURIComponent(currentCustomerId)}&date=${encodeURIComponent(date)}&code=${encodeURIComponent(code)}&items=${encodeURIComponent(JSON.stringify(items))}`
+            })
+            .then(r => r.json())
+            .then(data => {
+                document.getElementById('addInvoiceMsg').textContent = data.success ? '✅ ' + data.message : '❌ ' + data.message;
+                if (data.success) {
+                    setTimeout(refreshInvoices, 1500);
+                }
+            });
+        }
+
+        // ==================== EDIT INVOICE ====================
+        function showEditInvoice(invoiceId) {
+            showPasswordModal('edit-invoice', () => {
+                const invoice = currentInvoices.find(inv => inv.invoiceId === invoiceId);
+                if (!invoice) return;
+                
+                currentEditInvoiceId = invoiceId;
+                document.getElementById('editInvoiceDate').value = invoice.date;
+                document.getElementById('editCodeDisplay').textContent = invoice.code;
+                
+                fetch(SCRIPT_URL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                    body: `action=getInvoice&invoiceId=${encodeURIComponent(invoiceId)}`
+                })
+                .then(r => r.json())
+                .then(details => {
+                    const container = document.getElementById('editItemsContainer');
+                    container.innerHTML = details.map((item, i) => `
+                        <div class="item-row">
+                            <input type="text" class="edit-item-product" value="${item.product}" placeholder="الصنف">
+                            <input type="number" class="edit-item-quantity" value="${item.quantity}" min="1">
+                            <input type="number" class="edit-item-price" value="${item.unitPrice}" min="0" step="0.01">
+                            <button class="remove-btn" onclick="this.parentElement.remove()">✕</button>
+                        </div>
+                    `).join('');
+                    editItemCounter = details.length;
+                    updateEditTotal();
+                    showSection('editInvoiceSection');
+                });
+            });
+        }
+
+        function addEditItemRow() {
+            editItemCounter++;
+            const row = document.createElement('div');
+            row.className = 'item-row';
+            row.innerHTML = `
+                <input type="text" class="edit-item-product" placeholder="الصنف">
+                <input type="number" class="edit-item-quantity" value="1" min="1">
+                <input type="number" class="edit-item-price" value="0" min="0" step="0.01">
+                <button class="remove-btn" onclick="this.parentElement.remove()">✕</button>
+            `;
+            document.getElementById('editItemsContainer').appendChild(row);
+        }
+
+        function updateEditTotal() {
+            const products = document.querySelectorAll('.edit-item-product');
+            const quantities = document.querySelectorAll('.edit-item-quantity');
+            const prices = document.querySelectorAll('.edit-item-price');
+            let total = 0;
+            
+            for (let i = 0; i < products.length; i++) {
+                total += (parseFloat(quantities[i].value) || 0) * (parseFloat(prices[i].value) || 0);
+            }
+            
+            document.getElementById('editTotalAmount').textContent = total.toFixed(2);
+        }
+
+        function updateInvoice() {
+            const date = document.getElementById('editInvoiceDate').value;
+            const code = document.getElementById('editCodeDisplay').textContent;
+            
+            const products = document.querySelectorAll('.edit-item-product');
+            const quantities = document.querySelectorAll('.edit-item-quantity');
+            const prices = document.querySelectorAll('.edit-item-price');
+            const items = [];
+            
+            for (let i = 0; i < products.length; i++) {
+                const product = products[i].value.trim();
+                const quantity = parseInt(quantities[i].value);
+                const unitPrice = parseFloat(prices[i].value);
+                if (product && quantity > 0) items.push({ product, quantity, unitPrice });
+            }
+            
+            if (items.length === 0) {
+                document.getElementById('editInvoiceMsg').textContent = '❌ يجب إضافة بند واحد على الأقل';
+                return;
+            }
+            
+            document.getElementById('editInvoiceMsg').textContent = '⏳ جاري التحديث...';
+            
+            fetch(SCRIPT_URL, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                body: `action=updateInvoice&invoiceId=${currentEditInvoiceId}&date=${date}&code=${code}&items=${encodeURIComponent(JSON.stringify(items))}`
+            })
+            .then(r => r.json())
+            .then(data => {
+                document.getElementById('editInvoiceMsg').textContent = data.success ? '✅ ' + data.message : '❌ ' + data.message;
+                if (data.success) setTimeout(refreshInvoices, 1500);
+            });
+        }
+
+        // ==================== TRANSACTIONS ====================
+        function showAddTransactionModal(type) {
+            currentTransactionType = type;
+            document.getElementById('transactionModalTitle').textContent = type === 'تحصيل' ? '💵 إضافة تحصيل' : '📊 إضافة رصيد أول المدة';
+            document.getElementById('transactionDate').value = new Date().toISOString().split('T')[0];
+            document.getElementById('transactionAmount').value = '';
+            document.getElementById('transactionDescription').value = type === 'تحصيل' ? 'تحصيل نقدي' : 'رصيد أول المدة';
+            document.getElementById('transactionMsg').textContent = '';
+            document.getElementById('transactionModal').style.display = 'block';
+            document.getElementById('transactionAmount').focus();
+        }
+
+        function saveTransaction() {
+            const date = document.getElementById('transactionDate').value;
+            const amount = document.getElementById('transactionAmount').value;
+            const description = document.getElementById('transactionDescription').value;
+            
+            if (!amount || parseFloat(amount) <= 0) {
+                document.getElementById('transactionMsg').textContent = '❌ يرجى إدخال المبلغ';
+                return;
+            }
+            
+            document.getElementById('transactionMsg').textContent = '⏳ جاري الحفظ...';
+            
+            fetch(SCRIPT_URL, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                body: `action=addTransaction&customerId=${encodeURIComponent(currentCustomerId)}&date=${encodeURIComponent(date)}&type=${currentTransactionType}&amount=${amount}&description=${encodeURIComponent(description)}`
+            })
+            .then(r => r.json())
+            .then(data => {
+                document.getElementById('transactionMsg').textContent = data.success ? '✅ ' + data.message : '❌ ' + data.message;
+                if (data.success) {
+                    setTimeout(() => {
+                        closeTransactionModal();
+                        refreshInvoices();
+                    }, 1000);
+                }
+            });
+        }
+
+        function closeTransactionModal() {
+            document.getElementById('transactionModal').style.display = 'none';
+        }
+
+        // ==================== BALANCE ====================
+        function showBalance() {
+            fetch(SCRIPT_URL, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                body: `action=getBalance&customerId=${encodeURIComponent(currentCustomerId)}`
+            })
+            .then(r => r.json())
+            .then(data => {
+                document.getElementById('currentBalance').textContent = data.totalBalance.toFixed(2);
+                
+                const list = document.getElementById('transactionsList');
+                
+                if (data.transactions && data.transactions.length > 0) {
+                    list.innerHTML = data.transactions.map(t => `
+                        <div class="transaction-item">
+                            <div>
+                                <strong>${t.date}</strong>
+                                <br><small>${t.description || t.type}</small>
+                            </div>
+                            <div class="${t.type === 'تحصيل' ? 'credit' : 'debit'}">
+                                ${t.type === 'تحصيل' ? '➕' : '➖'} ${t.amount.toFixed(2)} ج.م
+                                <br><small>${t.type}</small>
+                            </div>
+                        </div>
+                    `).join('');
+                } else {
+                    list.innerHTML = '<p style="text-align: center; color: #999;">📭 لا توجد معاملات</p>';
+                }
+                
+                showSection('balanceSection');
+            });
+        }
+
+        // ==================== PASSWORD MODAL ====================
+        function showPasswordModal(action, callback) {
+            pendingModalAction = callback;
+            document.getElementById('modalPassword').value = '';
+            document.getElementById('modalError').textContent = '';
+            document.getElementById('modalConfirmBtn').textContent = '✅ تأكيد';
+            document.getElementById('modalConfirmBtn').onclick = () => {
+                if (document.getElementById('modalPassword').value.trim() === ADMIN_PASSWORD) {
+                    closePasswordModal();
+                    if (pendingModalAction) pendingModalAction();
+                } else {
+                    document.getElementById('modalError').textContent = '❌ كلمة السر غير صحيحة';
+                }
+            };
+            document.getElementById('passwordModal').style.display = 'block';
+            document.getElementById('modalPassword').focus();
+        }
+
+        function closePasswordModal() {
+            document.getElementById('passwordModal').style.display = 'none';
+            pendingModalAction = null;
+        }
+
+        // ==================== REFRESH ====================
+        function refreshInvoices() {
+            const mobile = document.getElementById('mobile').value;
+            const password = document.getElementById('password').value;
+            fetch(SCRIPT_URL, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                body: `action=login&mobile=${encodeURIComponent(mobile)}&password=${encodeURIComponent(password)}`
+            })
+            .then(r => r.json())
+            .then(d => { if (d.success) showInvoicesList(d.invoices); });
+        }
+
+        // ==================== NAVIGATION FUNCTIONS ====================
+        function backToInvoices() { showSection('invoicesSection'); }
+        function backToInvoicesFromDetails() { showSection('invoicesSection'); }
+        function backToInvoicesFromBalance() { showSection('invoicesSection'); }
+        
         function logout() {
-            document.getElementById('invoicesSection').classList.add('hidden');
-            document.getElementById('loginSection').classList.remove('hidden');
+            showSection('loginSection');
             document.getElementById('mobile').value = '';
             document.getElementById('password').value = '';
             document.getElementById('errorMsg').textContent = '';
             currentCustomerId = null;
             currentInvoices = [];
         }
+
+        // ==================== INITIALIZATION ====================
+        document.getElementById('mobile').addEventListener('keydown', function(e) {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                document.getElementById('password').focus();
+            }
+        });
+        
+        document.getElementById('password').addEventListener('keydown', function(e) {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                login();
+            }
+        });
+        
+        document.getElementById('modalPassword').addEventListener('keydown', function(e) {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                document.getElementById('modalConfirmBtn').click();
+            }
+        });
+        
+        document.getElementById('transactionAmount').addEventListener('keydown', function(e) {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                saveTransaction();
+            }
+        });
     </script>
 </body>
 </html>
