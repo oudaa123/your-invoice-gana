@@ -231,9 +231,8 @@
                     <button class="btn btn-outline btn-small" onclick="showTrash()">🗑️ المحذوفات</button>
                     <button class="btn btn-outline btn-small" onclick="showCashbox()">🏦 الخزنة</button>
                     <button class="btn btn-outline btn-small" onclick="showFullReport()">💰 كشف حساب</button>
-                    <button class="btn btn-outline btn-small" onclick="showProfitLoss()">📈 أرباح/خسائر</button>
-                    <button class="btn btn-outline btn-small" onclick="showExpenses()">🧾 مصروفات</button>
                     <button class="btn btn-outline btn-small" onclick="showFinancialCenter()">📊 مركز مالي</button>
+                    <button class="btn btn-outline btn-small" onclick="showExpenses()">🧾 مصروفات</button>
                     <button class="btn btn-outline btn-small admin-only" onclick="showUsersPanel()">👥 المستخدمين</button>
                 </div>
                 
@@ -261,6 +260,7 @@
                 <div id="selectedCustomerBox" class="selected-customer-box">
                     👤 العميل: <span id="selectedCustomerName"></span>
                 </div>
+                <button class="btn btn-outline btn-small" onclick="showAddCustomerModal()" style="width:auto;margin-bottom:10px;">➕ إنشاء عميل جديد</button>
                 <div class="code-box">📋 كود الفاتورة: <span id="autoCode">F1</span></div>
                 <h3>📦 البنود</h3>
                 <div id="itemsContainer"></div>
@@ -271,7 +271,8 @@
                     <label>📋 الباقي:</label><input type="number" id="remainingAmount" value="0" readonly>
                 </div>
                 <button class="btn btn-success" onclick="saveInvoice()">💾 حفظ</button>
-                <button class="btn btn-warning" onclick="backToMain()">⬅ رجوع</button>
+                <button class="btn btn-warning" onclick="autoSaveAndBack('addInvoiceSection', 'mainMenuSection')">⬅ رجوع</button>
+                <button class="btn btn-small btn-outline" onclick="window.print()" style="width:auto;margin-top:10px;">🖨️ طباعة</button>
                 <p id="addMsg" class="loading"></p>
             </div>
             
@@ -286,6 +287,7 @@
                 <div id="selectedSupplierBox" class="selected-customer-box">
                     🏢 المورد: <span id="selectedSupplierName"></span>
                 </div>
+                <button class="btn btn-outline btn-small" onclick="showAddSupplierModal()" style="width:auto;margin-bottom:10px;">➕ إنشاء مورد جديد</button>
                 <div class="code-box">📋 كود الشراء: <span id="purchaseAutoCode">P1</span></div>
                 <h3>📦 البنود</h3>
                 <div id="purchaseItemsContainer"></div>
@@ -296,7 +298,8 @@
                     <label>📋 الباقي:</label><input type="number" id="purchaseRemainingAmount" value="0" readonly>
                 </div>
                 <button class="btn btn-success" onclick="savePurchase()">💾 حفظ</button>
-                <button class="btn btn-warning" onclick="backToMain()">⬅ رجوع</button>
+                <button class="btn btn-warning" onclick="autoSaveAndBack('addPurchaseSection', 'mainMenuSection')">⬅ رجوع</button>
+                <button class="btn btn-small btn-outline" onclick="window.print()" style="width:auto;margin-top:10px;">🖨️ طباعة</button>
                 <p id="purchaseMsg" class="loading"></p>
             </div>
             
@@ -374,14 +377,6 @@
                 <button class="btn btn-primary" onclick="backToMain()">⬅ رجوع</button>
             </div>
             
-            <!-- ========== 📈 الأرباح والخسائر ========== -->
-            <div id="profitLossSection" class="hidden">
-                <h2>📈 الأرباح والخسائر</h2>
-                <div class="summary-box"><div>💰 المبيعات:</div><div><span id="plSales">0</span></div><div>📦 المشتريات:</div><div><span id="plPurchases">0</span></div><div>💸 المصروفات:</div><div><span id="plExpenses">0</span></div></div>
-                <div style="text-align:center;font-size:18px;margin:15px 0;font-weight:700;" id="plResult"></div>
-                <button class="btn btn-primary" onclick="backToMain()">⬅ رجوع</button>
-            </div>
-            
             <!-- ========== 🧾 المصروفات ========== -->
             <div id="expensesSection" class="hidden">
                 <h2>🧾 المصروفات</h2>
@@ -390,11 +385,11 @@
                 <button class="btn btn-primary" onclick="backToMain()">⬅ رجوع</button>
             </div>
             
-            <!-- ========== 📊 المركز المالي ========== -->
+            <!-- ========== 📊 المركز المالي (يشمل الأرباح والخسائر) ========== -->
             <div id="financialCenterSection" class="hidden">
-                <h2>📊 المركز المالي</h2>
+                <h2>📊 المركز المالي الشامل</h2>
                 <div class="fin-card" style="background: linear-gradient(135deg, #10b981 0%, #059669 100%);">
-                    <div class="fin-label">🏦 رصيد الخزنة الحالي</div>
+                    <div class="fin-label">🏦 رصيد الخزنة الحالي (نقدي + فودافون كاش)</div>
                     <div class="fin-value" id="fcCash">0.00 ج.م</div>
                 </div>
                 <div class="fin-grid">
@@ -413,6 +408,14 @@
                     <div class="fin-card">
                         <div class="fin-label">📦 إجمالي المشتريات</div>
                         <div class="fin-value" id="fcPurchases">0.00</div>
+                    </div>
+                    <div class="fin-card" style="background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);">
+                        <div class="fin-label">🧾 إجمالي المصروفات</div>
+                        <div class="fin-value" id="fcExpenses">0.00</div>
+                    </div>
+                    <div class="fin-card" style="background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);">
+                        <div class="fin-label">📈 صافي الربح / الخسارة</div>
+                        <div class="fin-value" id="fcNetProfit">0.00 ج.م</div>
                     </div>
                 </div>
                 <div class="fin-card" style="background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);">
@@ -445,11 +448,27 @@
                 <div id="suppliersTable"></div>
                 <button class="btn btn-primary" onclick="backToMain()">⬅ رجوع</button>
             </div>
+
+            <!-- ========== 📞 الدعم الفني ========== -->
+            <div style="margin-top: 20px; text-align: center;">
+                <a href="https://wa.me/201022495795" target="_blank" class="btn btn-info" style="display: inline-block; width: auto; padding: 10px 20px; text-decoration: none;">
+                    📞 الدعم الفني في خدمتك 48 ساعة (واتساب)
+                </a>
+            </div>
         </div>
     </div>
 
     <!-- ========== 🪟 النوافذ المنبثقة (Modals) ========== -->
     
+    <!-- مودال إضافة عميل جديد -->
+    <div id="addCustomerModal" class="modal"><div class="modal-content">
+        <h3>➕ إضافة عميل جديد</h3>
+        <input type="text" id="newCustomerName" placeholder="👤 الاسم">
+        <input type="tel" id="newCustomerMobile" placeholder="📱 رقم الموبايل (إجباري)">
+        <button class="btn btn-success" onclick="addNewCustomer()">💾 حفظ العميل</button><button class="btn btn-danger" onclick="closeAddCustomerModal()">❌ إلغاء</button>
+        <p id="addCustomerMsg" class="loading"></p>
+    </div></div>
+
     <!-- مودال التحصيل والدفع ورصيد أول -->
     <div id="transModal" class="modal"><div class="modal-content">
         <h3 id="transTitle"></h3>
@@ -538,7 +557,7 @@
     <!-- ========== ⚡ JavaScript ========== -->
     <script>
         // ==================== (1) الإعدادات والمتغيرات ====================
-        const URL = 'https://script.google.com/macros/s/AKfycbwV8uzGTAUDY1oHqAykuAmqC5UW5noeOR0ohkft8iz834X2MBkxr5l8uIvdFCi3jJd9/exec'; // ⚠️ غير الرابط
+        const URL = 'https://script.google.com/macros/s/AKfycbz91EypumqmP2UR3vyQZl_Eit1DvE8Ne6moVwHayFaBWM2_R1SsHwHyKqaoE7ZdQrLO/exec'; // ⚠️ غير الرابط
         const ADMIN_ACCESS_PASS = '010065';
         let cid = null, invoices = [], isAdmin = false, userPermissions = '', currentTab = 'sales';
         let transType = '', editId = null, currentBalance = null, userRole = '';
@@ -559,7 +578,7 @@
 
         // ==================== (3) التنقل بين الشاشات ====================
         function show(id) {
-            const sections = ['loginSection','mainMenuSection','addInvoiceSection','addPurchaseSection','editInvoiceSection','detailsSection','balanceSection','fullReportSection','trashSection','cashboxSection','profitLossSection','expensesSection','financialCenterSection','usersSection','inventorySection','suppliersSection'];
+            const sections = ['loginSection','mainMenuSection','addInvoiceSection','addPurchaseSection','editInvoiceSection','detailsSection','balanceSection','fullReportSection','trashSection','cashboxSection','expensesSection','financialCenterSection','usersSection','inventorySection','suppliersSection'];
             sections.forEach(s => { const el = document.getElementById(s); if (el) el.classList.add('hidden'); });
             if (id) { const el = document.getElementById(id); if (el) el.classList.remove('hidden'); }
         }
@@ -572,6 +591,13 @@
             document.getElementById('password').value = '';
             hideLoginMessage();
             show('loginSection'); 
+        }
+
+        function autoSaveAndBack(currentSection, targetSection) {
+            if (currentSection === 'addInvoiceSection') saveInvoice(true);
+            else if (currentSection === 'addPurchaseSection') savePurchase(true);
+            show(targetSection);
+            showInvoicesList(); // لتحديث القائمة بعد الحفظ
         }
 
         function callApi(action, params = {}) {
@@ -683,7 +709,7 @@
                     isAdmin = data.isAdmin || false;
                     userRole = data.role || 'عميل';
                     
-                    document.getElementById('customerName').textContent = data.customerName;
+                    document.getElementById('customerName').textContent = data.name || data.customerName; // استخدام الاسم الصحيح
                     
                     const roleBadge = document.getElementById('roleBadge');
                     if (isAdmin) {
@@ -814,7 +840,7 @@
             div.innerHTML = invoices.map(inv => `
                 <div class="invoice-card">
                     <div class="invoice-info" onclick="viewInvoice('${inv.invoiceId}','${inv.code}','${inv.date}','${inv.total}')">
-                        <div class="code">📄 ${inv.code}</div><div class="meta">📅 ${inv.date} | 💰 ${inv.total} ج.م</div>
+                        <div class="code">📄 ${inv.code}</div><div class="meta">📅 ${inv.date} | 💰 ${inv.total} ج.م | 👤 ${inv.customerName || 'عميل'}</div>
                     </div>
                     ${(isAdmin || userRole !== 'عميل') ? `<div class="invoice-actions">
                         <button class="btn btn-small btn-info" onclick="event.stopPropagation();requirePassword(() => editPrompt('${inv.invoiceId}'))">✏️</button>
@@ -832,7 +858,7 @@
                 div.innerHTML = data.map(inv => `
                     <div class="invoice-card">
                         <div class="invoice-info" onclick="viewInvoice('${inv.invoiceId}','${inv.code}','${inv.date}','${inv.total}')">
-                            <div class="code">📄 ${inv.code}</div><div class="meta">📅 ${inv.date} | 💰 ${inv.total} ج.م</div>
+                            <div class="code">📄 ${inv.code}</div><div class="meta">📅 ${inv.date} | 💰 ${inv.total} ج.م | 👤 ${inv.customerName || 'عميل'}</div>
                         </div>
                         <div class="invoice-actions">
                             <button class="btn btn-small btn-info" onclick="event.stopPropagation();requirePassword(() => editPrompt('${inv.invoiceId}'))">✏️</button>
@@ -848,7 +874,7 @@
             div.innerHTML = '<p style="text-align:center;color:var(--info);">⏳ جاري التحميل...</p>';
             callApi('getPurchases', {supplierId: selectedSupplierId || cid}).then(data => {
                 if (!data || data.length === 0) { div.innerHTML = '<p style="text-align:center;color:#9ca3af;padding:20px;">📭 لا توجد فواتير شراء</p>'; return; }
-                div.innerHTML = data.map(p => `<div class="invoice-card"><div class="invoice-info" onclick="viewPurchaseDetails('${p.purchaseId}')"><div class="code">📦 ${p.code}</div><div class="meta">📅 ${p.date} | 💰 ${p.total} ج.م</div></div></div>`).join('');
+                div.innerHTML = data.map(p => `<div class="invoice-card"><div class="invoice-info" onclick="viewPurchaseDetails('${p.purchaseId}')"><div class="code">📦 ${p.code}</div><div class="meta">📅 ${p.date} | 💰 ${p.total} ج.م | 🏢 ${p.supplierName || 'مورد'}</div></div></div>`).join('');
             });
         }
 
@@ -857,7 +883,7 @@
             div.innerHTML = '<p style="text-align:center;color:var(--info);">⏳ جاري تحميل كل فواتير الشراء...</p>';
             callApi('getAllPurchases').then(data => {
                 if (!data || data.length === 0) { div.innerHTML = '<p style="text-align:center;color:#9ca3af;padding:20px;">📭 لا توجد فواتير شراء</p>'; return; }
-                div.innerHTML = data.map(p => `<div class="invoice-card"><div class="invoice-info" onclick="viewPurchaseDetails('${p.purchaseId}')"><div class="code">📦 ${p.code}</div><div class="meta">📅 ${p.date} | 💰 ${p.total} ج.م</div></div></div>`).join('');
+                div.innerHTML = data.map(p => `<div class="invoice-card"><div class="invoice-info" onclick="viewPurchaseDetails('${p.purchaseId}')"><div class="code">📦 ${p.code}</div><div class="meta">📅 ${p.date} | 💰 ${p.total} ج.م | 🏢 ${p.supplierName || 'مورد'}</div></div></div>`).join('');
             });
         }
 
@@ -883,18 +909,18 @@
             callApi('getInvoice', {invoiceId}).then(details => {
                 document.getElementById('detCode').textContent = code;
                 document.getElementById('detDate').textContent = date;
-                document.getElementById('detCustomer').textContent = '';
                 document.getElementById('detPaid').textContent = details.paidAmount || '0.00';
                 document.getElementById('detTotal').textContent = total;
                 document.getElementById('detRemaining').textContent = (parseFloat(total) - parseFloat(details.paidAmount || 0)).toFixed(2);
                 document.getElementById('detTable').innerHTML = details.map(item => `<tr><td>${item.itemNumber}</td><td>${item.product}</td><td>${item.quantity}</td><td>${item.unitPrice}</td><td>${item.discount||'0.00'}</td><td>${item.netTotal||item.total}</td></tr>`).join('');
+                document.getElementById('detCustomer').textContent = details.customerName || '';
                 show('detailsSection');
             });
         }
 
         function viewPurchaseDetails(purchaseId) {
             callApi('getPurchaseDetails', {purchaseId}).then(details => {
-                let html = '<h2>📦 تفاصيل فاتورة الشراء</h2><table><thead><tr><th>#</th><th>الصنف</th><th>الكمية</th><th>سعر الشراء</th><th>الإجمالي</th></tr></thead><tbody>';
+                let html = `<h2>📦 تفاصيل فاتورة الشراء (${details.supplierName || ''})</h2><table><thead><tr><th>#</th><th>الصنف</th><th>الكمية</th><th>سعر الشراء</th><th>الإجمالي</th></tr></thead><tbody>`;
                 details.forEach(item => { html += `<tr><td>${item.itemNumber}</td><td>${item.product}</td><td>${item.quantity}</td><td>${item.unitPrice}</td><td>${item.total}</td></tr>`; });
                 html += '</tbody></table><button class="btn btn-primary" onclick="backToMain()">⬅ رجوع</button>';
                 document.getElementById('detailsSection').innerHTML = html;
@@ -905,7 +931,7 @@
         // ==================== (9) إضافة فاتورة بيع ====================
         function showAddInvoice() {
             document.getElementById('invoiceDate').value = new Date().toISOString().split('T')[0];
-            document.getElementById('autoCode').textContent = 'F' + (Date.now().toString().slice(-6));
+            callApi('getNextInvoiceNumber').then(d => document.getElementById('autoCode').textContent = d.code || 'F1');
             document.getElementById('itemsContainer').innerHTML = makeItemRow();
             document.getElementById('paidAmount').value = '0';
             document.getElementById('remainingAmount').value = '0';
@@ -927,7 +953,7 @@
             </div>`;
         }
 
-        function addItemRow() { document.getElementById('itemsContainer').insertAdjacentHTML('beforeend', makeItemRow()); }
+        function addItemRow() { document.getElementById('itemsContainer').insertAdjacentHTML('beforeend', makeItemRow()); setupItemRowEnter(); }
         
         function removeAddItem(btn) { 
             if (document.querySelectorAll('#itemsContainer .item-row').length > 1) { 
@@ -950,33 +976,60 @@
             document.getElementById('remainingAmount').value = (total-paid).toFixed(2); 
         }
 
-        function saveInvoice() {
+        function setupItemRowEnter() {
+            document.querySelectorAll('#itemsContainer .item-qty').forEach((input, index) => {
+                input.onkeydown = function(e) {
+                    if (e.key === 'Enter') {
+                        e.preventDefault();
+                        const rows = document.querySelectorAll('#itemsContainer .item-row');
+                        if (index < rows.length - 1) {
+                            rows[index + 1].querySelector('.item-product')?.focus();
+                        } else {
+                            addItemRow();
+                            setTimeout(() => {
+                                const newRow = document.querySelectorAll('#itemsContainer .item-row');
+                                newRow[newRow.length - 1].querySelector('.item-product')?.focus();
+                            }, 100);
+                        }
+                    }
+                };
+            });
+            
+            document.querySelectorAll('#itemsContainer .item-price').forEach((input, index) => {
+                input.onkeydown = function(e) {
+                    if (e.key === 'Enter') {
+                        e.preventDefault();
+                        const rows = document.querySelectorAll('#itemsContainer .item-row');
+                        rows[index].querySelector('.item-qty')?.focus();
+                    }
+                };
+            });
+        }
+
+        function saveInvoice(isAutoSave = false) {
             const customerName = document.getElementById('customerSearch').value.trim();
             
-            if (!customerName) { document.getElementById('addMsg').textContent = '❌ أدخل اسم العميل'; return; }
-            
-            // إذا لم يتم اختيار عميل من القائمة، نضيفه تلقائياً
-            if (!selectedCustomerId) {
+            if (!customerName && !isAutoSave) { document.getElementById('addMsg').textContent = '❌ أدخل اسم العميل'; return; }
+            if (!selectedCustomerId && !isAutoSave) {
                 document.getElementById('addMsg').textContent = '⏳ جاري إضافة العميل تلقائياً...';
                 callApi('addCustomerAuto', {name: customerName}).then(custResult => {
                     if (custResult.success) {
                         selectedCustomerId = custResult.customerId;
                         document.getElementById('selectedCustomerName').textContent = custResult.name;
                         document.getElementById('selectedCustomerBox').classList.add('show');
-                        if (custResult.message.includes('جديد')) {
-                            showNotification('✅ تم إضافة العميل: ' + custResult.name, 'success');
-                        }
-                        proceedSaveInvoice(customerName);
+                        showNotification('✅ تم إضافة العميل: ' + custResult.name, 'success');
+                        proceedSaveInvoice(customerName, isAutoSave);
                     } else {
                         document.getElementById('addMsg').textContent = '❌ ' + custResult.message;
                     }
                 });
                 return;
             }
-            proceedSaveInvoice(customerName);
+            proceedSaveInvoice(customerName, isAutoSave);
         }
 
-        function proceedSaveInvoice(customerName) {
+        function proceedSaveInvoice(customerName, isAutoSave = false) {
+            if (!customerName || !selectedCustomerId) return;
             const items = []; 
             document.querySelectorAll('#itemsContainer .item-row').forEach(row => { 
                 const p=row.querySelector('.item-product')?.value?.trim(), 
@@ -985,8 +1038,8 @@
                       d=parseFloat(row.querySelector('.item-discount')?.value)||0; 
                 if(p&&q>0&&pr>=0) items.push({product:p,quantity:q,unitPrice:pr,discount:d}); 
             });
-            if(items.length===0){document.getElementById('addMsg').textContent='❌ أضف بنداً واحداً على الأقل';return;}
-            document.getElementById('addMsg').textContent='⏳ جاري الحفظ...';
+            if(items.length===0){if(!isAutoSave)document.getElementById('addMsg').textContent='❌ أضف بنداً واحداً على الأقل';return;}
+            if(!isAutoSave) document.getElementById('addMsg').textContent='⏳ جاري الحفظ...';
             callApi('addInvoice',{
                 customerId:selectedCustomerId,
                 customerName: customerName,
@@ -995,9 +1048,9 @@
                 items:JSON.stringify(items),
                 paidAmount:document.getElementById('paidAmount').value
             }).then(d=>{
-                document.getElementById('addMsg').textContent=d.success?'✅ '+d.message:'❌ '+(d.message||'خطأ');
+                if(!isAutoSave) document.getElementById('addMsg').textContent=d.success?'✅ '+d.message:'❌ '+(d.message||'خطأ');
                 if(d.success){
-                    showNotification('✅ تم إضافة الفاتورة: ' + d.code, 'success');
+                    showNotification('✅ ' + d.message, 'success');
                     setTimeout(refreshAll,1000);
                 }
             });
@@ -1006,7 +1059,7 @@
         // ==================== (10) إضافة فاتورة شراء ====================
         function showAddPurchase() {
             document.getElementById('purchaseDate').value = new Date().toISOString().split('T')[0];
-            document.getElementById('purchaseAutoCode').textContent = 'P' + Date.now().toString().slice(-6);
+            callApi('getNextPurchaseNumber').then(d => document.getElementById('purchaseAutoCode').textContent = d.code || 'P1');
             document.getElementById('purchaseItemsContainer').innerHTML = makePurchaseItemRow();
             document.getElementById('purchasePaidAmount').value = '0';
             document.getElementById('purchaseRemainingAmount').value = '0';
@@ -1023,11 +1076,12 @@
                 <input type="text" class="purchase-item-product" placeholder="📝 الصنف">
                 <input type="number" class="purchase-item-qty" placeholder="🔢 كمية" value="1" min="1">
                 <input type="number" class="purchase-item-price" placeholder="💵 سعر الشراء" value="0" min="0" step="0.01">
+                <input type="number" class="purchase-item-sell-price" placeholder="💰 سعر البيع" value="0" min="0" step="0.01">
                 <button class="remove-btn" onclick="removePurchaseItem(this)">✕</button>
             </div>`;
         }
 
-        function addPurchaseItemRow() { document.getElementById('purchaseItemsContainer').insertAdjacentHTML('beforeend', makePurchaseItemRow()); }
+        function addPurchaseItemRow() { document.getElementById('purchaseItemsContainer').insertAdjacentHTML('beforeend', makePurchaseItemRow()); setupPurchaseItemRowEnter(); }
         
         function removePurchaseItem(btn) { 
             if (document.querySelectorAll('#purchaseItemsContainer .item-row').length > 1) { 
@@ -1050,41 +1104,71 @@
             document.getElementById('purchaseRemainingAmount').value = (total-paid).toFixed(2); 
         }
 
-        function savePurchase() {
+        function setupPurchaseItemRowEnter() {
+            document.querySelectorAll('#purchaseItemsContainer .purchase-item-price').forEach((input, index) => {
+                input.onkeydown = function(e) {
+                    if (e.key === 'Enter') {
+                        e.preventDefault();
+                        const rows = document.querySelectorAll('#purchaseItemsContainer .item-row');
+                        rows[index].querySelector('.purchase-item-sell-price')?.focus();
+                    }
+                };
+            });
+            
+            document.querySelectorAll('#purchaseItemsContainer .purchase-item-sell-price').forEach((input, index) => {
+                input.onkeydown = function(e) {
+                    if (e.key === 'Enter') {
+                        e.preventDefault();
+                        const rows = document.querySelectorAll('#purchaseItemsContainer .item-row');
+                        if (index < rows.length - 1) {
+                            rows[index + 1].querySelector('.purchase-item-product')?.focus();
+                        } else {
+                            addPurchaseItemRow();
+                            setTimeout(() => {
+                                const newRow = document.querySelectorAll('#purchaseItemsContainer .item-row');
+                                newRow[newRow.length - 1].querySelector('.purchase-item-product')?.focus();
+                            }, 100);
+                        }
+                    }
+                };
+            });
+        }
+
+        function savePurchase(isAutoSave = false) {
             const supplierName = document.getElementById('supplierSearch').value.trim();
             
-            if (!supplierName) { document.getElementById('purchaseMsg').textContent = '❌ أدخل اسم المورد'; return; }
+            if (!supplierName && !isAutoSave) { document.getElementById('purchaseMsg').textContent = '❌ أدخل اسم المورد'; return; }
             
-            if (!selectedSupplierId) {
+            if (!selectedSupplierId && !isAutoSave) {
                 document.getElementById('purchaseMsg').textContent = '⏳ جاري إضافة المورد تلقائياً...';
                 callApi('addSupplier', {name: supplierName}).then(supResult => {
                     if (supResult.success) {
                         selectedSupplierId = supResult.supplierId;
                         document.getElementById('selectedSupplierName').textContent = supplierName;
                         document.getElementById('selectedSupplierBox').classList.add('show');
-                        if (supResult.message.includes('تم إضافة')) {
-                            showNotification('✅ تم إضافة المورد: ' + supplierName, 'success');
-                        }
-                        proceedSavePurchase(supplierName);
+                        showNotification('✅ تم إضافة المورد: ' + supplierName, 'success');
+                        proceedSavePurchase(supplierName, isAutoSave);
                     } else {
                         document.getElementById('purchaseMsg').textContent = '❌ ' + supResult.message;
                     }
                 });
                 return;
             }
-            proceedSavePurchase(supplierName);
+            proceedSavePurchase(supplierName, isAutoSave);
         }
 
-        function proceedSavePurchase(supplierName) {
+        function proceedSavePurchase(supplierName, isAutoSave = false) {
+            if (!supplierName || !selectedSupplierId) return;
             const items = []; 
             document.querySelectorAll('#purchaseItemsContainer .item-row').forEach(row => { 
                 const p=row.querySelector('.purchase-item-product')?.value?.trim(), 
                       q=parseInt(row.querySelector('.purchase-item-qty')?.value), 
-                      pr=parseFloat(row.querySelector('.purchase-item-price')?.value); 
-                if(p&&q>0&&pr>=0) items.push({product:p,quantity:q,unitPrice:pr}); 
+                      pr=parseFloat(row.querySelector('.purchase-item-price')?.value),
+                      sp=parseFloat(row.querySelector('.purchase-item-sell-price')?.value) || pr * 1.2; 
+                if(p&&q>0&&pr>=0) items.push({product:p,quantity:q,unitPrice:pr, sellPrice: sp}); 
             });
-            if(items.length===0){document.getElementById('purchaseMsg').textContent='❌ أضف بنداً';return;}
-            document.getElementById('purchaseMsg').textContent='⏳ جاري الحفظ...';
+            if(items.length===0){if(!isAutoSave)document.getElementById('purchaseMsg').textContent='❌ أضف بنداً';return;}
+            if(!isAutoSave) document.getElementById('purchaseMsg').textContent='⏳ جاري الحفظ...';
             callApi('addPurchase',{
                 supplierId:selectedSupplierId,
                 supplierName: supplierName,
@@ -1093,9 +1177,9 @@
                 items:JSON.stringify(items),
                 paidAmount:document.getElementById('purchasePaidAmount').value
             }).then(d=>{
-                document.getElementById('purchaseMsg').textContent=d.success?'✅ '+d.message:'❌ '+(d.message||'خطأ');
+                if(!isAutoSave) document.getElementById('purchaseMsg').textContent=d.success?'✅ '+d.message:'❌ '+(d.message||'خطأ');
                 if(d.success){
-                    showNotification('✅ تم إضافة فاتورة الشراء: ' + d.code, 'success');
+                    showNotification('✅ ' + d.message, 'success');
                     setTimeout(refreshAll,1000);
                 }
             });
@@ -1239,6 +1323,7 @@
 
         function saveTransaction() { 
             const amt=document.getElementById('transAmount').value; 
+            const desc=document.getElementById('transDesc').value || '';
             if(!amt||parseFloat(amt)<=0){document.getElementById('transMsg').textContent='❌ أدخل المبلغ';return;}
             if(!selectedTransPersonId){document.getElementById('transMsg').textContent='❌ اختر ' + (transType==='تحصيل'?'عميلاً':'مورداً');return;}
             document.getElementById('transMsg').textContent='⏳ جاري الحفظ...'; 
@@ -1247,11 +1332,11 @@
                 date: document.getElementById('transDate').value,
                 type: transType,
                 amount: amt,
-                description: document.getElementById('transDesc').value
+                description: desc + ' - ' + document.getElementById('selectedTransPersonName').textContent // إضافة اسم العميل/المورد للوصف
             }).then(d=>{
                 document.getElementById('transMsg').textContent=d.success?'✅ '+d.message:'❌ '+d.message;
                 if(d.success){
-                    showNotification('✅ تم تسجيل ' + transType + ': ' + amt + ' ج.م', 'success');
+                    showNotification('✅ ' + d.message, 'success');
                     setTimeout(()=>{closeTransModal();refreshAll();},800);
                 }
             }); 
@@ -1384,7 +1469,7 @@
             if(!amt){document.getElementById('openingCashMsg').textContent='❌ أدخل المبلغ';return;}
             callApi('setOpeningCash',{date:document.getElementById('openingCashDate').value,amount:amt,notes:document.getElementById('openingCashNotes').value}).then(d=>{
                 document.getElementById('openingCashMsg').textContent=d.success?'✅ '+d.message:'❌ '+d.message;
-                if(d.success){showNotification('✅ تم تسجيل رصيد افتتاحي: ' + amt + ' ج.م', 'success');setTimeout(()=>{closeOpeningCashModal();showCashbox();},800);}
+                if(d.success){showNotification('✅ ' + d.message, 'success');setTimeout(()=>{closeOpeningCashModal();showCashbox();},800);}
             });
         }
         function closeOpeningCashModal(){document.getElementById('openingCashModal').style.display='none';}
@@ -1403,7 +1488,7 @@
             document.getElementById('expenseMsg').textContent='⏳ جاري الحفظ...';
             callApi('addExpense',{date:document.getElementById('expenseDate').value,amount:amt,description:document.getElementById('expenseDesc').value}).then(d=>{
                 document.getElementById('expenseMsg').textContent=d.success?'✅ '+d.message:'❌ '+d.message;
-                if(d.success){showNotification('✅ تم تسجيل مصروف: ' + amt + ' ج.م', 'warning');setTimeout(()=>{closeExpenseModal();},800);}
+                if(d.success){showNotification('✅ ' + d.message, 'warning');setTimeout(()=>{closeExpenseModal();},800);}
             });
         }
         function closeExpenseModal(){document.getElementById('expenseModal').style.display='none';}
@@ -1419,7 +1504,7 @@
             });
         }
 
-        // ==================== (19) المركز المالي والأرباح والخسائر ====================
+        // ==================== (19) المركز المالي (يشمل الأرباح والخسائر) ====================
         function showFinancialCenter(){
             show('financialCenterSection');
             callApi('getFinancialCenter').then(d=>{
@@ -1428,21 +1513,13 @@
                 document.getElementById('fcCreditors').textContent = (d.totalCreditors||'0.00') + ' ج.م';
                 document.getElementById('fcSales').textContent = (d.totalSales||'0.00') + ' ج.م';
                 document.getElementById('fcPurchases').textContent = (d.totalPurchases||'0.00') + ' ج.م';
+                document.getElementById('fcExpenses').textContent = (d.totalExpenses||'0.00') + ' ج.م';
+                document.getElementById('fcNetProfit').textContent = (d.netProfit||'0.00') + ' ج.م';
                 document.getElementById('fcInventory').textContent = (d.inventoryValue||'0.00') + ' ج.م';
             });
         }
 
-        function showProfitLoss(){
-            show('profitLossSection');
-            callApi('getProfitLoss').then(d=>{
-                document.getElementById('plSales').textContent=(d.totalSales||0).toFixed(2);
-                document.getElementById('plPurchases').textContent=(d.totalPurchases||0).toFixed(2);
-                document.getElementById('plExpenses').textContent=(d.totalExpenses||0).toFixed(2);
-                document.getElementById('plResult').innerHTML=d.netProfit>=0?'💰 صافي الربح: <strong style="color:var(--success);font-size:22px;">'+d.netProfit.toFixed(2)+' ج.م</strong>':'💸 صافي الخسارة: <strong style="color:var(--danger);font-size:22px;">'+Math.abs(d.netProfit).toFixed(2)+' ج.م</strong>';
-            });
-        }
-
-        // ==================== (20) المستخدمين ====================
+        // ==================== (20) المستخدمين والعملاء ====================
         function showUsersPanel(){
             if (!isAdmin) { showAdminAccess(); return; }
             show('usersSection');
@@ -1460,10 +1537,32 @@
             if(!name||!mobile||!pass){document.getElementById('addUserMsg').textContent='❌ أكمل البيانات';return;}
             callApi('addUser',{name,mobile,password:pass,role:document.getElementById('newUserRole').value,permissions:document.getElementById('newUserPerms').value}).then(d=>{
                 document.getElementById('addUserMsg').textContent=d.success?'✅ '+d.message:'❌ '+d.message;
-                if(d.success){showNotification('✅ تم إضافة المستخدم: ' + name, 'success');setTimeout(()=>{closeAddUserModal();showUsersPanel();},800);}
+                if(d.success){showNotification('✅ ' + d.message, 'success');setTimeout(()=>{closeAddUserModal();showUsersPanel();},800);}
             });
         }
         function closeAddUserModal(){document.getElementById('addUserModal').style.display='none';}
+
+        // إضافة عميل جديد
+        function showAddCustomerModal(){document.getElementById('addCustomerModal').style.display='block';}
+        
+        function addNewCustomer(){
+            const name=document.getElementById('newCustomerName').value.trim(),
+                  mobile=document.getElementById('newCustomerMobile').value.trim();
+            if(!name||!mobile){document.getElementById('addCustomerMsg').textContent='❌ الاسم والموبايل إجباريان';return;}
+            callApi('addCustomerWithMobile',{name,mobile}).then(d=>{
+                document.getElementById('addCustomerMsg').textContent=d.success?'✅ ' + d.message + ' - كلمة المرور: ' + (d.password || ''):'❌ '+d.message;
+                if(d.success){
+                    // تعبئة حقل البحث بالعميل الجديد
+                    document.getElementById('customerSearch').value = name;
+                    selectedCustomerId = d.customerId;
+                    document.getElementById('selectedCustomerName').textContent = name;
+                    document.getElementById('selectedCustomerBox').classList.add('show');
+                    showNotification('✅ ' + d.message, 'success');
+                    setTimeout(closeAddCustomerModal, 1000);
+                }
+            });
+        }
+        function closeAddCustomerModal(){document.getElementById('addCustomerModal').style.display='none';}
 
         // ==================== (21) الموردين ====================
         function showAddSupplierModal(){document.getElementById('addSupplierModal').style.display='block';}
@@ -1474,7 +1573,15 @@
             if(!name){document.getElementById('addSupplierMsg').textContent='❌ أدخل الاسم';return;}
             callApi('addSupplier',{name,mobile,address:document.getElementById('newSupplierAddress').value}).then(d=>{
                 document.getElementById('addSupplierMsg').textContent=d.success?'✅ '+d.message:'❌ '+d.message;
-                if(d.success){showNotification('✅ تم إضافة المورد: ' + name, 'success');setTimeout(()=>{closeAddSupplierModal();refreshAll();},800);}
+                if(d.success){
+                    showNotification('✅ ' + d.message, 'success');
+                    // تعبئة حقل البحث بالمورد الجديد
+                    document.getElementById('supplierSearch').value = name;
+                    selectedSupplierId = d.supplierId;
+                    document.getElementById('selectedSupplierName').textContent = name;
+                    document.getElementById('selectedSupplierBox').classList.add('show');
+                    setTimeout(closeAddSupplierModal, 1000);
+                }
             });
         }
         function closeAddSupplierModal(){document.getElementById('addSupplierModal').style.display='none';}
@@ -1511,12 +1618,12 @@
             if(q.length<1){div.classList.add('hidden');return;}
             callApi('searchCustomers',{query:q}).then(results=>{
                 if(!results||results.length===0){
-                    div.innerHTML = `<div class="suggestion-item" onclick="addCustomerAsNew('${q}')">➕ إضافة "${q}" كعميل جديد</div>`;
+                    div.innerHTML = `<div class="suggestion-item" onclick="showAddCustomerModal()">➕ إضافة "${q}" كعميل جديد</div>`;
                     div.classList.remove('hidden');
                     return;
                 }
                 div.innerHTML=results.map(r=>`<div class="suggestion-item" onclick="selectCustomer('${r.customerId}','${r.name}')">👤 ${r.name} - ${r.mobile}</div>`).join('');
-                div.innerHTML += `<div class="suggestion-item" style="background:#f0fdf4;" onclick="addCustomerAsNew('${q}')">➕ إضافة "${q}" كعميل جديد</div>`;
+                div.innerHTML += `<div class="suggestion-item" style="background:#f0fdf4;" onclick="showAddCustomerModal()">➕ إضافة عميل جديد</div>`;
                 div.classList.remove('hidden');
             });
         }
@@ -1528,19 +1635,6 @@
             document.getElementById('selectedCustomerBox').classList.add('show');
             document.getElementById('customerSuggestions').classList.add('hidden');
         }
-
-        function addCustomerAsNew(name) {
-            callApi('addCustomerAuto', {name: name}).then(result => {
-                if (result.success) {
-                    selectedCustomerId = result.customerId;
-                    document.getElementById('customerSearch').value = result.name;
-                    document.getElementById('selectedCustomerName').textContent = result.name;
-                    document.getElementById('selectedCustomerBox').classList.add('show');
-                    document.getElementById('customerSuggestions').classList.add('hidden');
-                    showNotification('✅ تم إضافة العميل: ' + result.name, 'success');
-                }
-            });
-        }
         
         function searchSuppliers(){
             const q=document.getElementById('supplierSearch').value.trim();
@@ -1548,12 +1642,12 @@
             if(q.length<1){div.classList.add('hidden');return;}
             callApi('searchSuppliers',{query:q}).then(results=>{
                 if(!results||results.length===0){
-                    div.innerHTML = `<div class="suggestion-item" onclick="addSupplierAsNew('${q}')">➕ إضافة "${q}" كمورد جديد</div>`;
+                    div.innerHTML = `<div class="suggestion-item" onclick="showAddSupplierModal()">➕ إضافة "${q}" كمورد جديد</div>`;
                     div.classList.remove('hidden');
                     return;
                 }
                 div.innerHTML=results.map(r=>`<div class="suggestion-item" onclick="selectSupplier('${r.supplierId}','${r.name}')">🏢 ${r.name} - ${r.mobile}</div>`).join('');
-                div.innerHTML += `<div class="suggestion-item" style="background:#f0fdf4;" onclick="addSupplierAsNew('${q}')">➕ إضافة "${q}" كمورد جديد</div>`;
+                div.innerHTML += `<div class="suggestion-item" style="background:#f0fdf4;" onclick="showAddSupplierModal()">➕ إضافة مورد جديد</div>`;
                 div.classList.remove('hidden');
             });
         }
@@ -1566,39 +1660,40 @@
             document.getElementById('supplierSuggestions').classList.add('hidden');
         }
 
-        function addSupplierAsNew(name) {
-            callApi('addSupplier', {name: name}).then(result => {
-                if (result.success) {
-                    selectedSupplierId = result.supplierId;
-                    document.getElementById('supplierSearch').value = name;
-                    document.getElementById('selectedSupplierName').textContent = name;
-                    document.getElementById('selectedSupplierBox').classList.add('show');
-                    document.getElementById('supplierSuggestions').classList.add('hidden');
-                    showNotification('✅ تم إضافة المورد: ' + name, 'success');
-                }
-            });
-        }
-
         // ==================== (24) الأحداث ====================
-        document.addEventListener('input', function(e) { 
-            if(e.target.closest('#itemsContainer')) updateAddTotal(); 
-            if(e.target.closest('#purchaseItemsContainer')) updatePurchaseTotal(); 
-            if(e.target.closest('#editItems')) updateEditTotal(); 
+        document.addEventListener('input', function(e) {
+            if(e.target.closest('#itemsContainer')) updateAddTotal();
+            if(e.target.closest('#purchaseItemsContainer')) updatePurchaseTotal();
+            if(e.target.closest('#editItems')) updateEditTotal();
+        });
+        
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Enter' && e.target.closest('#itemsContainer')) {
+                e.preventDefault(); // منع الإرسال التلقائي
+                if (e.target.classList.contains('item-product')) {
+                    e.target.closest('.item-row').querySelector('.item-qty').focus();
+                }
+            }
+            if (e.key === 'Enter' && e.target.closest('#purchaseItemsContainer')) {
+                e.preventDefault();
+                if (e.target.classList.contains('purchase-item-product')) {
+                    e.target.closest('.item-row').querySelector('.purchase-item-qty').focus();
+                } else if (e.target.classList.contains('purchase-item-qty')) {
+                    e.target.closest('.item-row').querySelector('.purchase-item-price').focus();
+                }
+            }
         });
         
         document.getElementById('mobile').addEventListener('keydown', function(e) { if(e.key==='Enter'){e.preventDefault();document.getElementById('password').focus();} });
         document.getElementById('password').addEventListener('keydown', function(e) { if(e.key==='Enter'){e.preventDefault();doLogin();} });
         
         window.onclick = function(e) {
-            if(e.target===document.getElementById('transModal')) closeTransModal();
-            if(e.target===document.getElementById('editTransModal')) closeEditTransModal();
-            if(e.target===document.getElementById('openingCashModal')) closeOpeningCashModal();
-            if(e.target===document.getElementById('expenseModal')) closeExpenseModal();
-            if(e.target===document.getElementById('addUserModal')) closeAddUserModal();
-            if(e.target===document.getElementById('addSupplierModal')) closeAddSupplierModal();
-            if(e.target===document.getElementById('inventoryCountModal')) closeInventoryCountModal();
-            if(e.target===document.getElementById('passwordModal')) closePasswordModal();
-            if(e.target===document.getElementById('adminAccessModal')) closeAdminAccessModal();
+            const modals = ['transModal','editTransModal','openingCashModal','expenseModal','addUserModal','addSupplierModal','addCustomerModal','inventoryCountModal','passwordModal','adminAccessModal'];
+            modals.forEach(id => {
+                if(e.target===document.getElementById(id)) {
+                    document.getElementById(id).style.display = 'none';
+                }
+            });
             if(!e.target.closest('#customerSearch')&&!e.target.closest('#customerSuggestions')) document.getElementById('customerSuggestions').classList.add('hidden');
             if(!e.target.closest('#supplierSearch')&&!e.target.closest('#supplierSuggestions')) document.getElementById('supplierSuggestions').classList.add('hidden');
             if(!e.target.closest('#transPersonSearch')&&!e.target.closest('#transPersonSuggestions')) document.getElementById('transPersonSuggestions').classList.add('hidden');
