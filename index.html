@@ -650,22 +650,23 @@ let S = {
   reportTab: 'customers'
 };
 
-// ==================== API ====================
 async function api(action, params = {}) {
-  try {
-    const r = await fetch(API_URL + action, {
-      method: 'POST',
-      headers: {
-        'apikey': SUPABASE_KEY,
-        'Authorization': `Bearer ${SUPABASE_KEY}`,
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify(params)
-    });
-    return await r.json();
-  } catch (e) {
-    return { success: false, message: '❌ خطأ في الاتصال بالخادم' };
+  // ده مؤقتاً بيرجع بيانات وهمية عشان نجرب
+  console.log('🔵 تم استدعاء:', action, params);
+  
+  if (action === 'login') {
+    return {
+      success: true,
+      customerId: '1',
+      name: 'المدير',
+      role: 'مدير',
+      isAdmin: true,
+      userType: 'employee',
+      invoices: []
+    };
   }
+  
+  return [];
 }
 
 // ==================== HELPERS ====================
