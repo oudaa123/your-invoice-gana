@@ -650,23 +650,73 @@ let S = {
   reportTab: 'customers'
 };
 
+// ==================== NEON API ====================
+const NEON_URL = 'https://ep-royal-credit-apwita9n-pooler.c-7.us-east-1.aws.neon.tech/sql';
+const NEON_PASSWORD = 'npg_mDMcoZYzC1n5';
+
 async function api(action, params = {}) {
-  // ده مؤقتاً بيرجع بيانات وهمية عشان نجرب
-  console.log('🔵 تم استدعاء:', action, params);
-  
-  if (action === 'login') {
-    return {
-      success: true,
-      customerId: '1',
-      name: 'المدير',
-      role: 'مدير',
-      isAdmin: true,
-      userType: 'employee',
-      invoices: []
-    };
+  try {
+    let query = '';
+    
+    switch(action) {
+      case 'login':
+        query = `SELECT id, name, role FROM users WHERE mobile = '${params.mobile}' AND password = '${params.password}' AND is_active = true`;
+        break;
+      case 'getAllInvoices':
+        query = `SELECT * FROM invoices WHERE status = 'نشط' ORDER BY created_at DESC`;
+        break;
+      case 'getInventory':
+        query = `SELECT * FROM inventory WHERE quantity > 0`;
+        break;
+      case 'getAllCustomers':
+        query = `SELECT * FROM customers WHERE is_active = true`;
+        break;
+      case 'getSuppliers':
+        query = `SELECT * FROM suppliers WHERE is_active = true`;
+        break;
+      case 'getExpenses':
+        query = `SELECT * FROM expenses ORDER BY date DESC`;
+        break;
+      case 'getUsers':
+        query = `SELECT * FROM users WHERE is_active = true`;
+        break;
+      default:
+        return [];
+    }
+    
+    const r = await fetch(NEON_URL, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Neon-Connection-String': `postgresql://neondb_owner:${NEON_PASSWORD}@ep-royal-credit-apwita9n-pooler.c-7.us-east-1.aws.neon.tech/neondb?sslmode=require`
+      },
+      body: JSON.stringify({ query })
+    });
+    
+    const data = await r.json();
+    
+    if (action === 'login') {
+      if (data.rows && data.rows.length > 0) {
+        const u = data.rows[0];
+        return {
+          success: true,
+          customerId: u.id,
+          name: u.name,
+          role: u.role || 'موظف',
+          isAdmin: u.role === 'مدير',
+          userType: 'employee',
+          invoices: []
+        };
+      }
+      return { success: false, message: 'بيانات خاطئة' };
+    }
+    
+    return data.rows || [];
+    
+  } catch (e) {
+    console.error('خطأ:', e);
+    return [];
   }
-  
-  return [];
 }
 
 // ==================== HELPERS ====================
