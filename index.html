@@ -637,7 +637,8 @@ tr.clickable:hover{background:#f0f4ff;cursor:pointer;}
 
 <script>
 // ==================== CONFIG ====================
-const API_URL = 'https://your-invoice-gana.vercel.app/api';
+const API_URL = 'https://mrihbjxschfkqqscupro.supabase.co/rest/v1/rpc/';
+const SUPABASE_KEY = 'sb_publishable_HpWA-ILEihvOpLu4S8SagA_Hcl0lcbv';
 
 // ==================== STATE ====================
 let S = {
@@ -650,18 +651,20 @@ let S = {
 };
 
 // ==================== API ====================
-async function api(action, params={}) {
-  const body = Object.entries({action, ...params})
-    .map(([k,v]) => encodeURIComponent(k)+'='+encodeURIComponent(v)).join('&');
+async function api(action, params = {}) {
   try {
-    const r = await fetch(API_URL, {
-      method:'POST',
-      headers:{'Content-Type':'application/x-www-form-urlencoded'},
-      body
+    const r = await fetch(API_URL + action, {
+      method: 'POST',
+      headers: {
+        'apikey': SUPABASE_KEY,
+        'Authorization': `Bearer ${SUPABASE_KEY}`,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(params)
     });
     return await r.json();
-  } catch(e) {
-    return {success:false, message:'❌ خطأ في الاتصال بالخادم'};
+  } catch (e) {
+    return { success: false, message: '❌ خطأ في الاتصال بالخادم' };
   }
 }
 
