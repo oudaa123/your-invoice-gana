@@ -1,7 +1,4 @@
 {
-  "name": "neon-api",
-  "version": "1.0.0",
-  "dependencies": {
-    "pg": "^8.11.0"
-  }
+  "name": "erp-api",
+  "version": "1.0.0"
 }
